@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { Payload } from './payload';
 import { UserService } from '../user/user.service';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -23,8 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const user = await this.userService.findOne(id);
 
+    if (!user.state) throw new ForbiddenException('Usuario inactivo, contacte a su administrador');
+
     return {
       id: user.id,
+      rol: user.rol,
     };
   }
 }
