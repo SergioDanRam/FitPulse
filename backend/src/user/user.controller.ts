@@ -13,30 +13,38 @@ import { JwtAuthGuard } from '../auth/guards/JWTAuthGuard';
 import { RolesGuard } from '../auth/guards/RolesGuard';
 import { Roles } from '../auth/utils/roles';
 import { RolUserEnum } from './enum/RolUserEnum';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { User } from './entities/user.entity';
+import { GetUser } from '../auth/decorators/get-user.decorator';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RolUserEnum.ADMIN)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post()
+  @Roles(RolUserEnum.ADMIN)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
+  @Roles(RolUserEnum.ADMIN)
   findAll() {
     return this.userService.findAll();
   }
 
   @Get(':id')
+  @Roles(RolUserEnum.ADMIN)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  @Auth(RolUserEnum.ADMIN, RolUserEnum.PARTNER)
+  remove(
+    @Param('id') id: string,
+    @GetUser() user: User
+  ) {
+    return this.userService.remove(id, user);
   }
 }

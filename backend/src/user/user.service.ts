@@ -1,8 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { RolUserEnum } from './enum/RolUserEnum';
 
 @Injectable()
 export class UserService {
@@ -10,7 +11,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto) {
 
@@ -47,8 +48,12 @@ export class UserService {
   //   user
   // }
 
-  async remove(id: string) {
-    const user = await this.findOne(id);
+  async remove(id: string, user: User) {
+
+    if (user.id !== id && user.rol !== RolUserEnum.ADMIN) {
+      throw new ForbiddenException("No puede eliminar esta cuenta")
+    }
+
     await this.userRepository.remove(user);
     return 'Usuario eliminado correctamente';
   }
