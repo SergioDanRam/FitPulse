@@ -54,7 +54,8 @@ export class UserService {
       throw new ForbiddenException("No puede eliminar esta cuenta")
     }
 
-    await this.userRepository.remove(user);
+    const userFound = await this.findOne(id);
+    await this.userRepository.remove(userFound);
     return 'Usuario eliminado correctamente';
   }
 
